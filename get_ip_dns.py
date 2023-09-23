@@ -6,23 +6,22 @@ from aliyunsdkcore.client import AcsClient
 from aliyunsdkalidns.request.v20150109 import UpdateDomainRecordRequest, DescribeDomainRecordsRequest, AddDomainRecordRequest
 from aliyunsdkcore.acs_exception.exceptions import ServerException
 
-
-# 阿里云API凭证
+# Alibaba Cloud API Credentials
 access_key_id = 'your_access_key_id'
 access_key_secret = 'your_access_key_secret'
-region_id = 'cn-hangzhou'  # 你的阿里云区域ID (可以不做修改)
+region_id = 'cn-hangzhou'  # Your Alibaba Cloud region ID (No modifications needed.)
 
-# 域名和记录信息
-domain_name = 'example.com'  # 你的域名
-sub_domain = 'www'  # 子域名，例如www
+# Domain name and record information.
+domain_name = 'example.com'  # your domain
+sub_domain = 'www'  # subdomain，for example: www
 
-# 设置日志记录
+# Set logging
 logging.basicConfig(level=logging.INFO)
 
 def get_public_ip():
     try:
         response = requests.get('https://api.ipify.org?format=json')
-        response.raise_for_status()  # 抛出HTTP错误
+        response.raise_for_status()  # Throw HTTP error.
         ip = response.json()['ip']
         logging.info(f'Public IP retrieved: {ip}')
         return ip
@@ -84,7 +83,7 @@ def main():
         new_ip = get_public_ip()
         if new_ip is not None:
             update_dns_record_if_needed(client, domain_name, sub_domain, new_ip)
-        time.sleep(10)  # 等待10秒再检查
+        time.sleep(10)  # Wait for 10 seconds before checking again.
 
 if __name__ == '__main__':
     main()
