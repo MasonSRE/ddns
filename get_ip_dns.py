@@ -3,9 +3,8 @@ import logging
 import requests
 import json
 from aliyunsdkcore.client import AcsClient
-from aliyunsdkalidns.request.v20150109 import UpdateDomainRecordRequest
+from aliyunsdkalidns.request.v20150109 import UpdateDomainRecordRequest, DescribeDomainRecordsRequest, AddDomainRecordRequest
 from aliyunsdkcore.acs_exception.exceptions import ServerException
-from aliyunsdkalidns.request.v20150109 import DescribeDomainRecordsRequest, DescribeDomainRecordInfoRequest
 
 
 # 阿里云API凭证
@@ -57,10 +56,23 @@ def update_dns_record(client, record_id, sub_domain, ip):
     except ServerException as e:
         logging.error(f'Failed to update DNS record: {e}')
 
+def add_dns_record(client, domain_name, sub_domain, ip):
+    request = AddDomainRecordRequest.AddDomainRecordRequest()
+    request.set_DomainName(domain_name)
+    request.set_RR(sub_domain)
+    request.set_Type('A')
+    request.set_Value(ip)
+    try:
+        client.do_action_with_exception(request)
+        logging.info(f'Added DNS record: {sub_domain}.{domain_name} -> {ip}')
+    except ServerException as e:
+        logging.error(f'Failed to add DNS record: {e}')
+
 def update_dns_record_if_needed(client, domain_name, sub_domain, new_ip):
     record_id, current_ip = get_current_dns_record(client, domain_name, sub_domain)
     if record_id is None:
-        logging.error(f'Failed to get the current DNS record for {sub_domain}.{domain_name}')
+        logging.warning(f'No existing DNS record found for {sub_domain}.{domain_name}, adding a new record.')
+        add_dns_record(client, domain_name, sub_domain, new_ip)
         return
     if current_ip != new_ip:
         update_dns_record(client, record_id, sub_domain, new_ip)
